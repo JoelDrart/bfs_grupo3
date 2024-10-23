@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
+</head>
+<body>
+    <nav class="bg-gray-800 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-white text-lg font-semibold">Búsqueda en Anchura</a>
+            <div class="space-x-4">
+                
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div id="cy" class="border rounded border-2 mt-6 mx-auto " style="width: 800px; height: 600px;"></div>
+    </main>
+    <button class="button" onclick="avisa()">XD</button>
+
+    <script>
+        var cy;
+        fetch('/graph')
+            .then(response => response.json())
+            .then(data => {
+                const elements = data.nodes.map( node => ({
+                    data: { id: node.id }
+                })
+                ).concat(data.links.map(link => ({
+                    data: { source: link.source, target: link.target }
+                }))
+                );
+                console.log("Data: ");
+                console.log(data);
+                console.log("Elements: ");
+                console.log(elements);
+
+                cy = cytoscape({
+                    container: document.getElementById('cy'),
+                    elements: elements,
+                    style: [
+                        {
+                            selector: 'node',
+                            style: {
+                                'background-color': '#0074D9',
+                                'label': 'data(id)'
+                            }
+                        },
+                        {
+                            selector: 'edge',
+                            style: {
+                                'width': 3,
+                                'line-color': '#ccc',
+                                //'target-arrow-color': '#ccc',
+                                //'target-arrow-shape': 'triangle',
+                                'curve-style': 'bezier'
+                            }
+                        }
+                    ],
+                    layout: {
+                        name: 'grid',
+                    }
+                });
+
+                cy.on('tap', 'node', function(evt){
+                    var node = evt.target;
+                    console.log( 'tapped ' + node.id() );
+                    });
+        
+                cy.on('tap', function(event){
+                    // target holds a reference to the originator
+                    // of the event (core or element)
+                    var evtTarget = event.target;
+                    
+                    if( evtTarget === cy ){
+                        console.log('tap on background');
+                    } else {
+                        console.log('tap on some element');
+                    }
+                    });
+
+            });
+
+
+        function avisa() {
+            console.log(cy.data());
+        }
+    </script>
+</body>
+</html>
