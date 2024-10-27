@@ -17,10 +17,16 @@
         </div>
     </nav>
 
-    <main>
+    <main class="flex flex-col alignt-center items-center">
         <div id="cy" class="border rounded border-2 mt-6 mx-auto " style="width: 800px; height: 600px;"></div>
+        <button class="p-4 bg-blue-400 rounded border mt-6  mx-auto hover:bg-blue-400" id="sendGraph">
+            Calcular Búsqueda en Anchura desde el nodo seleccionado
+        </button>
+
+        <div id="tree" class="border rounded border-2 mt-6 mx-auto " style="width: 800px; height: 600px;"></div>
+        <h3 >Resultados del BFS:</h3>
+        <pre id="results"></pre>
     </main>
-    <button class="button" onclick="avisa()">XD</button>
 
     <script>
         var cy;
@@ -66,9 +72,11 @@
                     }
                 });
 
+                /*
                 cy.on('tap', 'node', function(evt){
                     var node = evt.target;
                     console.log( 'tapped ' + node.id() );
+                    console.log(cy.data());
                     });
         
                 cy.on('tap', function(event){
@@ -82,6 +90,61 @@
                         console.log('tap on some element');
                     }
                     });
+                    */
+                
+        // Enviar el grafo al backend
+        document.getElementById('sendGraph').onclick = function () {
+            let elements = cy.elements().jsons();
+            fetch('/process_graph', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(elements)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Resultados del backend:', data);
+                nodos_visitados = data['visited_nodes'];
+                document.getElementById('results').innerText = nodos_visitados.join(', ');
+
+                //document.getElementById('results').innerText = JSON.stringify(data['visited_nodes'], null, 2);
+                drawBFSResult(data.bfs_tree, data.visited_nodes); // Función para dibujar el árbol de búsqueda
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        function drawBFSResult(treeEdges, visitedNodes) {
+            let tree = cytoscape({
+                container: document.getElementById('tree'),
+                elements: [
+                    ...treeEdges.map(edge => ({
+                        data: { id: `e${edge[0]}-${edge[1]}`, source: edge[0], target: edge[1] }
+                    })),
+                    ...visitedNodes.map(node => ({ data: { id: node } }))
+                ],
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': 'lightgreen',
+                            'label': 'data(id)'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 3,
+                            'line-color': '#ccc',
+                            'curve-style': 'bezier'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'grid'
+                }
+            });
+        }
 
             });
 

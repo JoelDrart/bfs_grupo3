@@ -11,6 +11,8 @@ Este es un proyecto de Flask que muestra un grafo utilizando Cytoscape.js.
 ## Instalación
 
 Clona el repositorio y ve al directorio.
+Opcional: Crear un .env con la variable de entorno
+FLASK_ENV=development
 
 # Crea y activa un entorno virtual:
 ## En Windows:
