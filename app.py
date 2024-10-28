@@ -12,7 +12,7 @@ def index():
 @app.route('/graph')
 def get_graph():
     G = nx.Graph()
-    G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1)])
+    G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1), (1,5), (5,6), (6,7), (7,1), (2,5), (3,6), (4,7)])
     graph_data = nx.node_link_data(G)
     return jsonify(graph_data)
 
@@ -20,10 +20,21 @@ def get_graph():
 @app.route('/process_graph', methods=['POST'])
 def process_graph():
     data = request.json
+    elements = data['elements']
+    start_node = data['startNode']
+    
+    print('Datos recibidos:')
+    print(data)
+    
+    print('Elementos recibidos:')
+    # print(elements)
+    print('Nodo inicial recibido:')
+    print(start_node)
+    
     G = nx.Graph()
     print('Grafo recibido:')
     # Convertir los datos del grafo en un objeto NetworkX
-    for element in data:
+    for element in elements:
         if element['group'] == 'nodes':
             G.add_node(element['data']['id'])
         elif element['group'] == 'edges':
@@ -31,7 +42,7 @@ def process_graph():
 
     print(G)
     # Ejecutar BFS desde un nodo (puedes cambiar el nodo inicial)
-    start_node = list(G.nodes)[0]  # Tomar el primer nodo como inicio
+    print('Nodo inicial:', start_node)
     visited_nodes, parents = bfs_tree(G, start_node)
 
     # Construir el árbol de búsqueda a partir de los padres

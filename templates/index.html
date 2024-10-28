@@ -30,6 +30,8 @@
 
     <script>
         var cy;
+        var startNode = null;
+
         fetch('/graph')
             .then(response => response.json())
             .then(data => {
@@ -61,8 +63,6 @@
                             style: {
                                 'width': 3,
                                 'line-color': '#ccc',
-                                //'target-arrow-color': '#ccc',
-                                //'target-arrow-shape': 'triangle',
                                 'curve-style': 'bezier'
                             }
                         }
@@ -71,47 +71,34 @@
                         name: 'grid',
                     }
                 });
-
-                /*
-                cy.on('tap', 'node', function(evt){
-                    var node = evt.target;
-                    console.log( 'tapped ' + node.id() );
-                    console.log(cy.data());
-                    });
         
-                cy.on('tap', function(event){
-                    // target holds a reference to the originator
-                    // of the event (core or element)
-                    var evtTarget = event.target;
-                    
-                    if( evtTarget === cy ){
-                        console.log('tap on background');
-                    } else {
-                        console.log('tap on some element');
-                    }
-                    });
-                    */
-                
+        // Evento para seleccionar el nodo de inicio con un clic
+        cy.on('tap', 'node', function(evt) {
+            startNode = evt.target.id();  // Guardar el id del nodo seleccionado
+            console.log('Nodo de inicio seleccionado:', startNode);
+        });
+        
         // Enviar el grafo al backend
         document.getElementById('sendGraph').onclick = function () {
             let elements = cy.elements().jsons();
+            if (!startNode) {
+                alert("Selecciona un nodo de inicio haciendo clic en él antes de realizar BFS.");
+                return;
+            }
             fetch('/process_graph', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(elements)
+                body: JSON.stringify({ elements: elements, startNode: startNode })
             })
             .then(response => response.json())
             .then(data => {
                 console.log('Resultados del backend:', data);
-                nodos_visitados = data['visited_nodes'];
-                document.getElementById('results').innerText = nodos_visitados.join(', ');
-
-                //document.getElementById('results').innerText = JSON.stringify(data['visited_nodes'], null, 2);
+                document.getElementById('results').innerText = data.visited_nodes.join(', ');
                 drawBFSResult(data.bfs_tree, data.visited_nodes); // Función para dibujar el árbol de búsqueda
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error Process_Graph:', error));
         };
 
         function drawBFSResult(treeEdges, visitedNodes) {
@@ -146,12 +133,7 @@
             });
         }
 
-            });
-
-
-        function avisa() {
-            console.log(cy.data());
-        }
+        });
     </script>
 </body>
 </html>
