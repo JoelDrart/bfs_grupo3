@@ -12,7 +12,10 @@ def index():
 @app.route('/graph')
 def get_graph():
     G = nx.Graph()
-    G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1), (1,5), (5,6), (6,7), (7,1), (2,5), (3,6), (4,7)])
+    
+    #G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1), (1,5), (5,6), (6,7), (7,1), (2,5), (3,6), (4,7)])
+    G.add_edges_from([(1,5), (1,2), (5,4), (5,2), (2,3), (4,6), (3,4)])
+    
     graph_data = nx.node_link_data(G)
     return jsonify(graph_data)
 
@@ -23,16 +26,15 @@ def process_graph():
     elements = data['elements']
     start_node = data['startNode']
     
-    print('Datos recibidos:')
-    print(data)
+    print('>Datos recibidos:')
+    #print(data)
     
-    print('Elementos recibidos:')
+    print('>Elementos recibidos:')
     # print(elements)
-    print('Nodo inicial recibido:')
-    print(start_node)
+    print('>Nodo inicial recibido:', start_node)
     
     G = nx.Graph()
-    print('Grafo recibido:')
+    print('>Grafo recibido:')
     # Convertir los datos del grafo en un objeto NetworkX
     for element in elements:
         if element['group'] == 'nodes':

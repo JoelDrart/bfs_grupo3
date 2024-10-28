@@ -10,23 +10,47 @@
 <body>
     <nav class="bg-gray-800 p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-white text-lg font-semibold">Búsqueda en Anchura</a>
+            <a href="#" class="text-white text-lg font-semibold">Búsqueda en Anchura (Selecciona un nodo de inicio)</a>
             <div class="space-x-4">
                 
             </div>
         </div>
     </nav>
 
-    <main class="flex flex-col alignt-center items-center">
-        <div id="cy" class="border rounded border-2 mt-6 mx-auto " style="width: 800px; height: 600px;"></div>
-        <button class="p-4 bg-blue-400 rounded border mt-6  mx-auto hover:bg-blue-400" id="sendGraph">
-            Calcular Búsqueda en Anchura desde el nodo seleccionado
-        </button>
-
-        <div id="tree" class="border rounded border-2 mt-6 mx-auto " style="width: 800px; height: 600px;"></div>
-        <h3 >Resultados del BFS:</h3>
-        <pre id="results"></pre>
+    <main class="flex flex-col items-center mt-6">
+        <div class="flex flex-row justify-center space-x-4">
+            <!-- Gráfico del grafo original -->
+             <div class="flex flex-col">
+                <h1 class="text-xl mb-2 ml-4">Grafo:</h1>
+                 <div id="cy" class="border rounded border-2" style="width: 45vw; height: 50vh;"></div>
+             </div>
+    
+            <!-- Gráfico del árbol BFS -->
+            <div>
+                <h1 class="text-xl mb-2 ml-4">Árbol BFS:</h1>
+                <div id="tree" class="border rounded border-2" style="width: 45vw; height: 50vh;"></div>
+            </div>
+        </div>
+    
+        <!-- Información del nodo de inicio y resultados del BFS -->
+        <div class="grid grid-cols-3 items-center justify-items-center gap-x-8 mt-4">
+            <div class="p-2 rounded bg-red-300 text-center w-full max-w-xs">
+                <h2>Nodo de Inicio: <span class="font-bold" id="nodo_seleccionado"></span></h2>
+            </div>
+        
+            <button class="p-2 bg-blue-400 shadow rounded w-full max-w-xs hover:bg-blue-500 transition duration-300 ease-in-out transform hover:scale-105" id="sendGraph">
+                Calcular Búsqueda en Anchura
+            </button>
+            
+        
+            <div class="p-2 rounded bg-red-300 text-center w-full max-w-xs">
+                <h3>Recorrido BFS:</h3>
+                <pre id="results" class="text-sm"></pre>
+            </div>
+        </div>
+        
     </main>
+    
 
     <script>
         var cy;
@@ -59,6 +83,12 @@
                             }
                         },
                         {
+                            selector: `node[id = "${startNode}"]`, // Seleccionar el nodo de inicio
+                            style: {
+                                'background-color': 'red'
+                            }
+                        },
+                        {
                             selector: 'edge',
                             style: {
                                 'width': 3,
@@ -68,16 +98,19 @@
                         }
                     ],
                     layout: {
-                        name: 'grid',
+                        name: 'breadthfirst',
+                        directed: true,
+                        spacingFactor: 1.5, // Espaciado entre nodos
                     }
                 });
         
         // Evento para seleccionar el nodo de inicio con un clic
         cy.on('tap', 'node', function(evt) {
             startNode = evt.target.id();  // Guardar el id del nodo seleccionado
+            document.getElementById('nodo_seleccionado').innerText = startNode;
             console.log('Nodo de inicio seleccionado:', startNode);
         });
-        
+
         // Enviar el grafo al backend
         document.getElementById('sendGraph').onclick = function () {
             let elements = cy.elements().jsons();
@@ -100,22 +133,29 @@
             })
             .catch(error => console.error('Error Process_Graph:', error));
         };
-
         function drawBFSResult(treeEdges, visitedNodes) {
             let tree = cytoscape({
                 container: document.getElementById('tree'),
                 elements: [
+                    // Definir las aristas (edges) del árbol de búsqueda
                     ...treeEdges.map(edge => ({
                         data: { id: `e${edge[0]}-${edge[1]}`, source: edge[0], target: edge[1] }
                     })),
+                    // Definir los nodos visitados en el árbol de búsqueda
                     ...visitedNodes.map(node => ({ data: { id: node } }))
                 ],
                 style: [
                     {
                         selector: 'node',
                         style: {
-                            'background-color': 'lightgreen',
+                            'background-color': 'lightgreen', // Color predeterminado para nodos
                             'label': 'data(id)'
+                        }
+                    },
+                    {
+                        selector: `node[id = "${startNode}"]`, // Seleccionar el nodo de inicio
+                        style: {
+                            'background-color': 'red'
                         }
                     },
                     {
@@ -128,7 +168,9 @@
                     }
                 ],
                 layout: {
-                    name: 'grid'
+                    name: 'breadthfirst', // Disposición de árbol para BFS
+                    directed: true,       // Para hacer que el árbol sea direccional
+                    roots: `#${startNode}` // Configura el nodo raíz como el nodo de inicio seleccionado
                 }
             });
         }
