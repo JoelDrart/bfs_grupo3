@@ -22,20 +22,20 @@
             <!-- Gráfico del grafo original -->
              <div class="flex flex-col">
                 <h1 class="text-xl mb-2 ml-4">Grafo:</h1>
-                 <div id="cy" class="border rounded border-2" style="width: 45vw; height: 50vh;"></div>
+                 <div id="cy" class="border rounded border-2" style="width: 45vw; height: 70vh;"></div>
              </div>
     
             <!-- Gráfico del árbol BFS -->
             <div>
                 <h1 class="text-xl mb-2 ml-4">Árbol BFS:</h1>
-                <div id="tree" class="border rounded border-2" style="width: 45vw; height: 50vh;"></div>
+                <div id="tree" class="border rounded border-2" style="width: 45vw; height: 70vh;"></div>
             </div>
         </div>
     
         <!-- Información del nodo de inicio y resultados del BFS -->
         <div class="grid grid-cols-3 items-center justify-items-center gap-x-8 mt-4">
             <div class="p-2 rounded bg-red-300 text-center w-full max-w-xs">
-                <h2>Nodo de Inicio: <span class="font-bold" id="nodo_seleccionado"></span></h2>
+                <h2>Nodo de Inicio: <span class="font-bold text-xl" id="nodo_seleccionado"></span></h2>
             </div>
         
             <button class="p-2 bg-blue-400 shadow rounded w-full max-w-xs hover:bg-blue-500 transition duration-300 ease-in-out transform hover:scale-105" id="sendGraph">
@@ -44,8 +44,8 @@
             
         
             <div class="p-2 rounded bg-red-300 text-center w-full max-w-xs">
-                <h3>Recorrido BFS:</h3>
-                <pre id="results" class="text-sm"></pre>
+                <h3 class="font-bold">Recorrido BFS:</h3>
+                <div id="results" class="text-sm"></div>
             </div>
         </div>
         
@@ -128,12 +128,13 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Resultados del backend:', data);
-                document.getElementById('results').innerText = data.visited_nodes.join(', ');
+                document.getElementById('results').innerText = data.visited_nodes.join('; ');
                 drawBFSResult(data.bfs_tree, data.visited_nodes); // Función para dibujar el árbol de búsqueda
             })
             .catch(error => console.error('Error Process_Graph:', error));
         };
         function drawBFSResult(treeEdges, visitedNodes) {
+            console.log('Dibujando árbol BFS:', treeEdges, visitedNodes);
             let tree = cytoscape({
                 container: document.getElementById('tree'),
                 elements: [
@@ -142,7 +143,7 @@
                         data: { id: `e${edge[0]}-${edge[1]}`, source: edge[0], target: edge[1] }
                     })),
                     // Definir los nodos visitados en el árbol de búsqueda
-                    ...visitedNodes.map(node => ({ data: { id: node } }))
+                    ...visitedNodes.map(node => ({ data: { id: node.slice(0, -2) } }))
                 ],
                 style: [
                     {
